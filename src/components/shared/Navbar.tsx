@@ -18,7 +18,7 @@ const Navbar = () => {
   const user = session?.user;
 
   const handleSignOut = async () => {
-      await authClient.signOut();
+    await authClient.signOut();
   };
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#E5E9DF] bg-[#FAFAF6]">
@@ -62,48 +62,81 @@ const Navbar = () => {
         {/* Authentication buttons */}
 
         <div className="flex items-center gap-3">
-          {user ? <Popover>
-            <PopoverTrigger
-              render={
-                <Avatar>
-                  <AvatarImage
-                    referrerPolicy="no-referrer"
-                    src={user?.image as string}
-                  />
-                  <AvatarFallback>
-                    {user?.name?.charAt(0) || "C"}
-                  </AvatarFallback>
-                </Avatar>
-              }
-            ></PopoverTrigger>
-            <PopoverContent>
-              <PopoverHeader>
-                <PopoverTitle>{user?.name}</PopoverTitle>
+          {user ? (
+            <Popover>
+              <PopoverTrigger
+                render={
+                  <button className="flex items-center gap-2 rounded-full px-2 py-1 transition-colors hover:bg-[#EAF3DF]">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage
+                        referrerPolicy="no-referrer"
+                        src={user.image as string}
+                      />
+                      <AvatarFallback>
+                        {user.name?.charAt(0) || "U"}
+                      </AvatarFallback>
+                    </Avatar>
 
-                <PopoverDescription>{user?.email}</PopoverDescription>
+                    <span className="text-sm font-semibold text-[#253326]">
+                      {user.name}
+                    </span>
+                  </button>
+                }
+              />
 
-                <Button variant="destructive" onClick={handleSignOut}>
-                  Sign Out
+              <PopoverContent align="end" className="w-60">
+                <div className="flex flex-col gap-1">
+                  <Link
+                    href="/profile"
+                    className="rounded-md px-3 py-2 text-sm hover:bg-[#EAF3DF]"
+                  >
+                    Profile Information
+                  </Link>
+
+                  <Link
+                    href="/create-event"
+                    className="rounded-md px-3 py-2 text-sm hover:bg-[#EAF3DF]"
+                  >
+                    Create Event
+                  </Link>
+
+                  <Link
+                    href="/manage-events"
+                    className="rounded-md px-3 py-2 text-sm hover:bg-[#EAF3DF]"
+                  >
+                    Manage Events
+                  </Link>
+
+                  <div className="my-1 border-t border-[#E5E9DF]" />
+
+                  <Button
+                    variant="ghost"
+                    onClick={handleSignOut}
+                    className="justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+                  >
+                    Sign Out
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <>
+              <Link href="/signin">
+                <Button
+                  variant="outline"
+                  className="border-[#3F773C] text-[#3F773C] hover:bg-[#EAF3DF] hover:text-[#3F773C]"
+                >
+                  Sign In
                 </Button>
-              </PopoverHeader>
-            </PopoverContent>
-          </Popover> : <>
-           <Link href="/signin">
-            <Button
-              variant="outline"
-              className="border-[#3F773C] text-[#3F773C] hover:bg-[#EAF3DF] hover:text-[#3F773C]"
-            >
-              Sign In
-            </Button>
-          </Link>
+              </Link>
 
-          <Link href="/signup">
-            <Button className="bg-[#3F773C] text-white shadow-sm transition-colors hover:bg-[#315F30]">
-              Sign Up
-            </Button>
-          </Link>
-          </> 
-}
+              <Link href="/signup">
+                <Button className="bg-[#3F773C] text-white shadow-sm transition-colors hover:bg-[#315F30]">
+                  Sign Up
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </nav>
     </header>

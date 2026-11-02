@@ -44,13 +44,15 @@ const Hero = () => {
               </Button>
             </Link>
 
-            {/* Intentionally not linked yet */}
+            
+           <Link href="/create-event">
             <Button
               type="button"
               className="h-11 border border-white/80 bg-transparent px-6 font-semibold text-white shadow-sm hover:bg-white/15"
             >
               Create an Event
             </Button>
+            </Link>
           </div>
         </div>
       </div>
