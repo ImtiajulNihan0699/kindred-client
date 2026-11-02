@@ -1,9 +1,25 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
-
+import { authClient } from "@/lib/auth-client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
+
+  const handleSignOut = async () => {
+      await authClient.signOut();
+  };
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#E5E9DF] bg-[#FAFAF6]">
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
@@ -44,8 +60,35 @@ const Navbar = () => {
         </div>
 
         {/* Authentication buttons */}
+
         <div className="flex items-center gap-3">
-          <Link href="/signin">
+          {user ? <Popover>
+            <PopoverTrigger
+              render={
+                <Avatar>
+                  <AvatarImage
+                    referrerPolicy="no-referrer"
+                    src={user?.image as string}
+                  />
+                  <AvatarFallback>
+                    {user?.name?.charAt(0) || "C"}
+                  </AvatarFallback>
+                </Avatar>
+              }
+            ></PopoverTrigger>
+            <PopoverContent>
+              <PopoverHeader>
+                <PopoverTitle>{user?.name}</PopoverTitle>
+
+                <PopoverDescription>{user?.email}</PopoverDescription>
+
+                <Button variant="destructive" onClick={handleSignOut}>
+                  Sign Out
+                </Button>
+              </PopoverHeader>
+            </PopoverContent>
+          </Popover> : <>
+           <Link href="/signin">
             <Button
               variant="outline"
               className="border-[#3F773C] text-[#3F773C] hover:bg-[#EAF3DF] hover:text-[#3F773C]"
@@ -59,6 +102,8 @@ const Navbar = () => {
               Sign Up
             </Button>
           </Link>
+          </> 
+}
         </div>
       </nav>
     </header>
