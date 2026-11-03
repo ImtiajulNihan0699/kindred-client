@@ -56,7 +56,7 @@ export default function ProfilePage() {
 
   if (isPending) {
     return (
-      <p className="py-20 text-center text-[#687365]">
+      <p className="py-20 text-center text-muted-foreground">
         Loading profile...
       </p>
     );
@@ -64,7 +64,7 @@ export default function ProfilePage() {
 
   if (!currentUser) {
     return (
-      <p className="py-20 text-center text-[#687365]">
+      <p className="py-20 text-center text-muted-foreground">
         No user information found.
       </p>
     );
@@ -131,7 +131,7 @@ export default function ProfilePage() {
               </Field>
 
               {message && (
-                <p className="text-center text-sm text-[#3F773C]">
+                <p className="text-center text-sm text-primary">
                   {message}
                 </p>
               )}
