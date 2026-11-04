@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 const Navbar = () => {
   const { data: session } = authClient.useSession();
   const user = session?.user;
-  console.log("Logged-in User ID:", user?.id);
+ 
 
   const handleSignOut = async () => {
     await authClient.signOut();

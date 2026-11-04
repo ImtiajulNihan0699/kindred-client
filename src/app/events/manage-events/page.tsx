@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20,9 +19,7 @@ const ManageEventsPage = () => {
 
     const fetchUserEvents = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:8000/events/user/${user.id}`
-        );
+        const res = await fetch(`http://localhost:8000/events/user/${user.id}`);
 
         if (!res.ok) {
           throw new Error("Failed to fetch your events");
@@ -81,9 +78,7 @@ const ManageEventsPage = () => {
       {/* Page heading */}
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Manage Events
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">Manage Events</h1>
 
           <p className="mt-2 text-muted-foreground">
             Manage the events you have created.
@@ -96,9 +91,7 @@ const ManageEventsPage = () => {
       </div>
 
       {/* Error message */}
-      {error && (
-        <p className="text-destructive">{error}</p>
-      )}
+      {error && <p className="text-destructive">{error}</p>}
 
       {/* Empty state */}
       {!error && events.length === 0 && (
@@ -111,10 +104,7 @@ const ManageEventsPage = () => {
             Start creating events and bring your community together.
           </p>
 
-          <Link
-            href="/events/create-event"
-            className="mt-5 inline-block"
-          >
+          <Link href="/events/create-event" className="mt-5 inline-block">
             <Button>Create Your First Event</Button>
           </Link>
         </div>
@@ -124,7 +114,12 @@ const ManageEventsPage = () => {
       {!error && events.length > 0 && (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
-            <EventCard key={event._id} event={event} />
+            <EventCard
+              key={event._id}
+              event={event}
+              showEdit={true}
+              showDelete={true}
+            />
           ))}
         </div>
       )}
