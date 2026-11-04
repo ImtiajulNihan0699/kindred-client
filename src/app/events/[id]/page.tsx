@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import EditButton from "@/components/updatedelete/EditButton";
 import DeleteButton from "@/components/updatedelete/DeleteButton";
+import JoinEventButton from "@/components/events/JoinEventButton";
 
 const EventDetailsPage = () => {
   const params = useParams();
@@ -30,6 +31,7 @@ const EventDetailsPage = () => {
 
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
+  const userId = user?.id;
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,8 +96,6 @@ const EventDetailsPage = () => {
     month: "long",
     year: "numeric",
   });
-
-  const isPastEvent = new Date(`${event.eventDate}T23:59:59`) < new Date();
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
@@ -244,38 +244,13 @@ const EventDetailsPage = () => {
           </section>
 
           {/* Join Event Section - Visible to Everyone */}
-          <section className="rounded-2xl bg-primary/5 p-6 sm:p-8">
-            <div className="flex flex-col items-center gap-5 text-center">
-              <div className="rounded-full bg-primary/10 p-4 text-primary">
-                <HandHeart size={32} />
-              </div>
-
-              <div className="max-w-xl">
-                <h2 className="text-2xl font-bold">
-                  Be Part of Something Meaningful
-                </h2>
-
-                <p className="mt-3 leading-7 text-muted-foreground">
-                  Your involvement can make a real difference. Take the first
-                  step and become part of this community initiative.
-                </p>
-              </div>
-
-              <Button
-                size="lg"
-                className="w-full sm:w-auto"
-                disabled={isPastEvent}
-              >
-                {isPastEvent ? "Event Has Ended" : "Join This Event"}
-              </Button>
-
-              <p className="text-xs text-muted-foreground">
-                {isPastEvent
-                  ? "This event date has already passed."
-                  : "Join functionality will be available soon."}
-              </p>
-            </div>
-          </section>
+          {userId ? (
+            <JoinEventButton eventId={event._id} userId={userId} />
+          ) : (
+            <Link href="/signin">
+              <Button>Sign in to Join</Button>
+            </Link>
+          )}
         </CardContent>
       </Card>
 

@@ -109,6 +109,13 @@ const Navbar = () => {
                     Manage Events
                   </Link>
 
+                  <Link
+                    href="/events/joined-events"
+                    className="rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                  >
+                    Joined Events
+                  </Link>
+
                   <div className="my-1 border-t border-border" />
 
                   <Button
