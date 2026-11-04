@@ -38,14 +38,14 @@ const Hero = () => {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <Link href="/explore-events">
+            <Link href="/events/explore-events">
               <Button className="h-11 bg-[#8BC746] px-6 font-semibold text-[#253326] shadow-sm hover:bg-[#A0D65E]">
                 Explore Events
               </Button>
             </Link>
 
             
-           <Link href="/create-event">
+           <Link href="/events/create-event">
             <Button
               type="button"
               className="h-11 border border-white/80 bg-transparent px-6 font-semibold text-white shadow-sm hover:bg-white/15"

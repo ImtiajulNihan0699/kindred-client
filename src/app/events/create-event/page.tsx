@@ -3,6 +3,8 @@
 
 import { useSyncExternalStore } from "react";
 import type { FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,23 +31,48 @@ const getTodayDate = () => {
 };
 
 const CreateEventPage = () => {
-  const handleCreateEvent = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const router = useRouter();
+const { data: session } = authClient.useSession();
+const user = session?.user;
+ const handleCreateEvent = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
-    const createEventData = Object.fromEntries(formData.entries());
+  if (!user) {
+    alert("Please sign in to create an event.");
+    return;
+  }
 
+  const formData = new FormData(e.currentTarget);
+  const createEventData = Object.fromEntries(formData.entries());
+
+  const eventData = {
+    ...createEventData,
+    createdBy: user.id,
+  };
+
+  try {
     const res = await fetch("http://localhost:8000/events", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(createEventData),
+      body: JSON.stringify(eventData),
     });
+
+    if (!res.ok) {
+      throw new Error("Failed to create event");
+    }
 
     const data = await res.json();
     console.log(data);
-  };
+
+    // Redirect after successful event creation
+    router.push("/events/manage-events");
+  } catch (error) {
+    console.error(error);
+    alert("Something went wrong while creating the event.");
+  }
+};
 
   const minDate = useSyncExternalStore(
     subscribe,

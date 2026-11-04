@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 const Navbar = () => {
   const { data: session } = authClient.useSession();
   const user = session?.user;
+  console.log("Logged-in User ID:", user?.id);
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -50,10 +51,10 @@ const Navbar = () => {
           </Link>
 
           <Link
-            href="/upcoming-events"
+            href="/events/upcoming-events"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
-            Upcoming Events
+            Upcoming Events 
           </Link>
         </div>
         <div className="flex items-center gap-2 m-2">
@@ -95,14 +96,14 @@ const Navbar = () => {
                   </Link>
 
                   <Link
-                    href="/create-event"
+                    href="/events/create-event"
                     className="rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
                   >
                     Create Event
                   </Link>
 
                   <Link
-                    href="/manage-events"
+                    href="/events/manage-events"
                     className="rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
                   >
                     Manage Events
