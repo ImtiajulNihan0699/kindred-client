@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import EditButton from "@/components/updatedelete/EditButton";
+import DeleteButton from "@/components/updatedelete/DeleteButton";
 
 const EventDetailsPage = () => {
   const params = useParams();
@@ -145,7 +146,10 @@ const EventDetailsPage = () => {
                   onUpdated={(updatedEvent) => setEvent(updatedEvent)}
                 />
 
-                <Button variant="destructive">Delete</Button>
+                <DeleteButton
+                  eventId={event._id}
+                  redirectTo="/events/manage-events"
+                />
               </div>
             )}
           </div>

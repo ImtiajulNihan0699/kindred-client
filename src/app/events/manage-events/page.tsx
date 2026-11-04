@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,18 +9,22 @@ import { Button } from "@/components/ui/button";
 
 const ManageEventsPage = () => {
   const { data: session, isPending } = authClient.useSession();
+
   const user = session?.user;
+  const userId = user?.id;
 
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (isPending || !user) return;
+    if (isPending || !userId) return;
 
     const fetchUserEvents = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/events/user/${user.id}`);
+        const res = await fetch(
+          `http://localhost:8000/events/user/${userId}`,
+        );
 
         if (!res.ok) {
           throw new Error("Failed to fetch your events");
@@ -36,13 +41,15 @@ const ManageEventsPage = () => {
     };
 
     fetchUserEvents();
-  }, [user?.id, isPending]);
+  }, [userId, isPending]);
 
   // Session loading
   if (isPending) {
     return (
       <main className="mx-auto max-w-7xl px-6 py-12">
-        <p className="text-muted-foreground">Loading session...</p>
+        <p className="text-muted-foreground">
+          Loading session...
+        </p>
       </main>
     );
   }
@@ -51,7 +58,9 @@ const ManageEventsPage = () => {
   if (!user) {
     return (
       <main className="mx-auto max-w-7xl px-6 py-12 text-center">
-        <h1 className="text-2xl font-bold">Please sign in</h1>
+        <h1 className="text-2xl font-bold">
+          Please sign in
+        </h1>
 
         <p className="mt-2 text-muted-foreground">
           You need to sign in to manage your events.
@@ -68,7 +77,9 @@ const ManageEventsPage = () => {
   if (loading) {
     return (
       <main className="mx-auto max-w-7xl px-6 py-12">
-        <p className="text-muted-foreground">Loading your events...</p>
+        <p className="text-muted-foreground">
+          Loading your events...
+        </p>
       </main>
     );
   }
@@ -78,7 +89,9 @@ const ManageEventsPage = () => {
       {/* Page heading */}
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Manage Events</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Manage Events
+          </h1>
 
           <p className="mt-2 text-muted-foreground">
             Manage the events you have created.
@@ -91,7 +104,9 @@ const ManageEventsPage = () => {
       </div>
 
       {/* Error message */}
-      {error && <p className="text-destructive">{error}</p>}
+      {error && (
+        <p className="text-destructive">{error}</p>
+      )}
 
       {/* Empty state */}
       {!error && events.length === 0 && (
@@ -104,7 +119,10 @@ const ManageEventsPage = () => {
             Start creating events and bring your community together.
           </p>
 
-          <Link href="/events/create-event" className="mt-5 inline-block">
+          <Link
+            href="/events/create-event"
+            className="mt-5 inline-block"
+          >
             <Button>Create Your First Event</Button>
           </Link>
         </div>
@@ -119,6 +137,13 @@ const ManageEventsPage = () => {
               event={event}
               showEdit={true}
               showDelete={true}
+              onDelete={(eventId) => {
+                setEvents((previousEvents) =>
+                  previousEvents.filter(
+                    (event) => event._id !== eventId,
+                  ),
+                );
+              }}
             />
           ))}
         </div>

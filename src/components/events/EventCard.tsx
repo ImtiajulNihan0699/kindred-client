@@ -1,9 +1,11 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
+
 import EditButton from "../updatedelete/EditButton";
+import DeleteButton from "../updatedelete/DeleteButton";
 
 export type Event = {
   _id: string;
@@ -20,12 +22,14 @@ type EventCardProps = {
   event: Event;
   showEdit?: boolean;
   showDelete?: boolean;
+  onDelete?: (eventId: string) => void;
 };
 
 const EventCard = ({
   event,
   showEdit = false,
   showDelete = false,
+  onDelete,
 }: EventCardProps) => {
   const formattedDate = new Date(
     `${event.eventDate}T00:00:00`,
@@ -59,21 +63,23 @@ const EventCard = ({
           <p>📍 {event.location}</p>
         </div>
 
-        <p className="text-sm text-muted-foreground">{event.description}</p>
+        <p className="text-sm text-muted-foreground">
+          {event.description}
+        </p>
 
         <div className="flex gap-2">
           <Link href={`/events/${event._id}`} className="flex-1">
             <Button className="w-full">View Details</Button>
           </Link>
 
-          {showEdit && (
-            <EditButton event={event} />
-          )}
+          {showEdit && <EditButton event={event} />}
 
           {showDelete && (
-            <Button variant="destructive" className="flex-1">
-              Delete
-            </Button>
+            <DeleteButton
+              eventId={event._id}
+              redirectTo="/events/manage-events"
+              onDeleted={onDelete}
+            />
           )}
         </div>
       </CardContent>
