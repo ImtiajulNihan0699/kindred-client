@@ -38,7 +38,7 @@ const Hero = () => {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <Link href="/upcoming-events">
+            <Link href="/explore-events">
               <Button className="h-11 bg-[#8BC746] px-6 font-semibold text-[#253326] shadow-sm hover:bg-[#A0D65E]">
                 Explore Events
               </Button>
