@@ -1,11 +1,12 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import EventCard, { type Event } from "@/components/events/EventCard";
 import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ManageEventsPage = () => {
   const { data: session, isPending } = authClient.useSession();
@@ -17,13 +18,41 @@ const ManageEventsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const fetchUserEvents = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:8000/events/user/${userId}`,
+        { cache: "no-store" },
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch your events");
+      }
+
+      const data: Event[] = await res.json();
+
+      setEvents(data);
+      setError("");
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load your events.");
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
   useEffect(() => {
     if (isPending || !userId) return;
 
-    const fetchUserEvents = async () => {
+    let ignore = false;
+
+    const loadUserEvents = async () => {
       try {
         const res = await fetch(
           `http://localhost:8000/events/user/${userId}`,
+          { cache: "no-store" },
         );
 
         if (!res.ok) {
@@ -31,36 +60,85 @@ const ManageEventsPage = () => {
         }
 
         const data: Event[] = await res.json();
-        setEvents(data);
+
+        if (!ignore) {
+          setEvents(data);
+          setError("");
+        }
       } catch (err) {
         console.error(err);
-        setError("Unable to load your events.");
+
+        if (!ignore) {
+          setError("Unable to load your events.");
+        }
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchUserEvents();
+    loadUserEvents();
+
+    return () => {
+      ignore = true;
+    };
   }, [userId, isPending]);
 
-  // Session loading
+  const handleRetry = async () => {
+    setLoading(true);
+    setError("");
+    await fetchUserEvents();
+  };
+
   if (isPending) {
     return (
       <main className="mx-auto max-w-7xl px-6 py-12">
-        <p className="text-muted-foreground">
-          Loading session...
-        </p>
+        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-48" />
+            <Skeleton className="h-5 w-64" />
+          </div>
+
+          <Skeleton className="h-9 w-36" />
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="overflow-hidden rounded-xl border border-border bg-card"
+            >
+              <Skeleton className="h-52 w-full rounded-none" />
+
+              <div className="space-y-3 p-5">
+                <Skeleton className="h-5 w-20 rounded-full" />
+                <Skeleton className="h-6 w-3/4" />
+
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+
+                <Skeleton className="h-16 w-full" />
+
+                <div className="flex gap-2">
+                  <Skeleton className="h-9 flex-1" />
+                  <Skeleton className="h-9 flex-1" />
+                  <Skeleton className="h-9 flex-1" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
     );
   }
 
-  // User is not logged in
   if (!user) {
     return (
       <main className="mx-auto max-w-7xl px-6 py-12 text-center">
-        <h1 className="text-2xl font-bold">
-          Please sign in
-        </h1>
+        <h1 className="text-2xl font-bold">Please sign in</h1>
 
         <p className="mt-2 text-muted-foreground">
           You need to sign in to manage your events.
@@ -73,25 +151,55 @@ const ManageEventsPage = () => {
     );
   }
 
-  // Events loading
   if (loading) {
     return (
       <main className="mx-auto max-w-7xl px-6 py-12">
-        <p className="text-muted-foreground">
-          Loading your events...
-        </p>
+        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-48" />
+            <Skeleton className="h-5 w-64" />
+          </div>
+
+          <Skeleton className="h-9 w-36" />
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="overflow-hidden rounded-xl border border-border bg-card"
+            >
+              <Skeleton className="h-52 w-full rounded-none" />
+
+              <div className="space-y-3 p-5">
+                <Skeleton className="h-5 w-20 rounded-full" />
+                <Skeleton className="h-6 w-3/4" />
+
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+
+                <Skeleton className="h-16 w-full" />
+
+                <div className="flex gap-2">
+                  <Skeleton className="h-9 flex-1" />
+                  <Skeleton className="h-9 flex-1" />
+                  <Skeleton className="h-9 flex-1" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
     );
   }
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-12">
-      {/* Page heading */}
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Manage Events
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">Manage Events</h1>
 
           <p className="mt-2 text-muted-foreground">
             Manage the events you have created.
@@ -103,12 +211,16 @@ const ManageEventsPage = () => {
         </Link>
       </div>
 
-      {/* Error message */}
       {error && (
-        <p className="text-destructive">{error}</p>
+        <div className="mb-5 flex flex-col items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-destructive">{error}</p>
+
+          <Button variant="outline" size="sm" onClick={handleRetry}>
+            Retry
+          </Button>
+        </div>
       )}
 
-      {/* Empty state */}
       {!error && events.length === 0 && (
         <div className="rounded-xl border border-border bg-card px-6 py-12 text-center">
           <h2 className="text-xl font-semibold">
@@ -119,16 +231,12 @@ const ManageEventsPage = () => {
             Start creating events and bring your community together.
           </p>
 
-          <Link
-            href="/events/create-event"
-            className="mt-5 inline-block"
-          >
+          <Link href="/events/create-event" className="mt-5 inline-block">
             <Button>Create Your First Event</Button>
           </Link>
         </div>
       )}
 
-      {/* User's events */}
       {!error && events.length > 0 && (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
@@ -140,7 +248,7 @@ const ManageEventsPage = () => {
               onDelete={(eventId) => {
                 setEvents((previousEvents) =>
                   previousEvents.filter(
-                    (event) => event._id !== eventId,
+                    (previousEvent) => previousEvent._id !== eventId,
                   ),
                 );
               }}

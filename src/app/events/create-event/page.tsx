@@ -1,13 +1,18 @@
-
 "use client";
 
 import { useSyncExternalStore } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
@@ -17,7 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-// Get today's date in YYYY-MM-DD format.
 const subscribe = () => () => {};
 
 const getTodayDate = () => {
@@ -32,53 +36,60 @@ const getTodayDate = () => {
 
 const CreateEventPage = () => {
   const router = useRouter();
-const { data: session } = authClient.useSession();
-const user = session?.user;
- const handleCreateEvent = async (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-
-  if (!user) {
-    alert("Please sign in to create an event.");
-    return;
-  }
-
-  const formData = new FormData(e.currentTarget);
-  const createEventData = Object.fromEntries(formData.entries());
-
-  const eventData = {
-    ...createEventData,
-    createdBy: user.id,
-  };
-
-  try {
-    const res = await fetch("http://localhost:8000/events", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(eventData),
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to create event");
-    }
-
-    const data = await res.json();
-    console.log(data);
-
-    // Redirect after successful event creation
-    router.push("/events/manage-events");
-  } catch (error) {
-    console.error(error);
-    alert("Something went wrong while creating the event.");
-  }
-};
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   const minDate = useSyncExternalStore(
     subscribe,
     getTodayDate,
-    () => ""
+    () => "",
   );
+
+  const handleCreateEvent = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!user) {
+      toast.error("Please sign in to create an event.");
+      return;
+    }
+
+    const formData = new FormData(e.currentTarget);
+    const createEventData = Object.fromEntries(formData.entries());
+
+    const eventData = {
+      ...createEventData,
+      createdBy: user.id,
+    };
+
+    try {
+      const res = await fetch("http://localhost:8000/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventData),
+      });
+
+      if (!res.ok) {
+        const errorData: { message?: string } = await res
+          .json()
+          .catch(() => ({}));
+
+        throw new Error(errorData.message || "Failed to create event");
+      }
+
+      toast.success("Event created successfully");
+      router.push("/events/manage-events");
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while creating the event.",
+      );
+    }
+  };
 
   return (
     <div className="mx-auto my-10 max-w-2xl px-6">
@@ -124,6 +135,7 @@ const user = session?.user;
 
               <Field>
                 <FieldLabel htmlFor="eventType">Event Category</FieldLabel>
+
                 <select
                   id="eventType"
                   name="eventType"
@@ -151,6 +163,7 @@ const user = session?.user;
                   placeholder="https://i.ibb.co/..."
                   required
                 />
+
                 <FieldDescription>
                   Paste the direct link from ImgBB.
                 </FieldDescription>

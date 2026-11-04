@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import {
   AlertDialog,
@@ -52,7 +53,7 @@ const DeleteButton = ({
         );
       }
 
-      alert("Event deleted successfully!");
+      toast.success("Event deleted successfully");
 
       if (onDeleted) {
         onDeleted(eventId);
@@ -63,7 +64,7 @@ const DeleteButton = ({
     } catch (error) {
       console.error(error);
 
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Something went wrong while deleting the event.",

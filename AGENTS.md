@@ -10,42 +10,44 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Kindred client
 
-Community/volunteer events app. Next.js 16 App Router, Tailwind 4, shadcn (`base-nova`), better-auth + MongoDB. Early stage: auth and marketing pages are real; event pages are stubs.
+Community/volunteer events app. Next.js 16.4.3 (App Router), React 19.3.0, Tailwind 4 (CSS-first), shadcn `base-nova` on `@base-ui/react`, better-auth + MongoDB. Most pages are client components using `authClient` hooks.
 
 ## Commands
 
 - `npm install` — npm only (`package-lock.json`; no pnpm/yarn/bun lockfile).
-- `npm run dev`
-- `npm run lint` — bare `eslint` with ESLint 9 flat config; lints the whole repo.
-- `npx tsc --noEmit` — there is no typecheck script.
-- `npm run build`
-- No tests or test runner are configured. Verify changes with lint, `tsc`, and (when routing/build config changes) `npm run build`.
+- `npm run dev` — Next dev server.
+- `npm run lint` — `eslint` (ESLint 9 flat config, `eslint-config-next/core-web-vitals` + `typescript`); lints whole repo.
+- `npx tsc --noEmit` — no typecheck script.
+- `npm run build` / `npm run start`
+- No tests configured. Verify with lint, `tsc`, and `npm run build` if routing/build config changes.
 
-## Next.js 16 quirks
+## Next.js / build quirks
 
-- Read `node_modules/next/dist/docs/` before using Next APIs; this version differs from older docs.
-- `next.config.ts` enables `cacheComponents`, `partialPrefetching`, and `reactCompiler`; check the bundled docs for caching/data-fetching implications before adding server data code.
-- `next dev` regenerates the `nextjs-agent-rules` block at the top of this file. Keep it in commits.
-- CSS is compiled via the `@tailwindcss/turbopack` loader configured in `next.config.ts`; don't add Tailwind/PostCSS config files.
+- Read `node_modules/next/dist/docs/` before using Next APIs (version differs from older docs).
+- `next.config.ts`: `cacheComponents: false`, `partialPrefetching: false`, `reactCompiler: true` (`babel-plugin-react-compiler`), `experimental.agentFeedback: true`. Images allow `i.ibb.co` and `i.ibb.co.com`.
+- CSS compiled via `@tailwindcss/turbopack` loader in `next.config.ts` turbopack rules; no Tailwind/PostCSS config files. Theme tokens in `src/app/globals.css` (`@theme inline`).
+- `next dev` regenerates the nextjs-agent-rules block at top — keep it in commits.
 
-## Layout
+## Layout & UI
 
-- `src/app` — App Router routes. Root layout wraps every page in `ThemeProvider`, `Navbar`, and `Footer`.
-- `src/components/ui` — shadcn-generated primitives. The project uses style `base-nova` on `@base-ui/react`, not Radix: use Base UI APIs (e.g. `<PopoverTrigger render={...}>`), not Radix's `asChild`.
-- `src/components/{shared,home}` — app components; `src/lib` — auth and utilities.
-- Add primitives with `npx shadcn@latest add <name>` instead of hand-writing files in `components/ui`.
-- `cn` is re-exported from the npm package `cn` (`src/lib/utils.ts`), not from `clsx`/`tailwind-merge`.
-- Tailwind is CSS-first: theme tokens live in `src/app/globals.css` (`@theme inline`); there is no `tailwind.config`.
+- `src/app` (App Router). Root layout (`src/app/layout.tsx`) wraps pages in `ThemeProvider`, `Navbar`, `Footer` with fonts Inter/Lora.
+- `src/components/ui` — shadcn primitives (style `base-nova`, `@base-ui/react`). Use Base UI APIs (e.g. `<PopoverTrigger render={...}>`), not Radix `asChild`. Add via `npx shadcn@latest add <name>`.
+- `src/components/{shared,home,events}` — app components; `src/lib` — auth/utilities.
+- `cn` re-exported from npm package `cn` (`src/lib/utils.ts`), not `clsx`/`tailwind-merge`.
+- Routes: auth (`/signin`, `/signup`), events under `/events/*` (`upcoming-events`, `explore-events`, `create-event`, `manage-events`, `joined-events`, `[id]`), `/profile`. Navbar links point to `/events/*`.
 
-## Auth and environment
+## Auth & environment
 
-- better-auth + MongoDB. Server config: `src/lib/auth.ts`; client: `src/lib/auth-client.ts`; catch-all handler: `src/app/api/auth/[...all]/route.ts`.
-- The database name is hardcoded to `kindredDB`; the connection comes from `MONGODB_URI`.
-- Required env (`.env` is gitignored): `MONGODB_URI`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BETTER_AUTH_GOOGLE_CLIENT_ID`, `BETTER_AUTH_GOOGLE_CLIENT_SECRET`.
-- Email/password and Google OAuth are both enabled. Client components read session state with `authClient.useSession()`; server code imports `auth`.
+- better-auth + MongoDB. Server: `src/lib/auth.ts` (MongoClient, db name hardcoded `kindredDB` from `MONGODB_URI`, adapter `@better-auth/mongo-adapter`). Client: `src/lib/auth-client.ts` (`createAuthClient`, uses `process.env.BETTER_AUTH_URL`). Handler: `src/app/api/auth/[...all]/route.ts`.
+- Email/password and Google OAuth enabled. Client reads session via `authClient.useSession()`; server imports `auth`.
+- Required env (`.env` gitignored): `MONGODB_URI`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BETTER_AUTH_GOOGLE_CLIENT_ID`, `BETTER_AUTH_GOOGLE_CLIENT_SECRET`.
 
-## Conventions and gotchas
+## Backend API (separate service)
+
+- Event pages call a separate backend at `http://localhost:8000` (e.g. `GET /events`, `GET /events/user/:userId`, `POST /events`). This is not mocked in the Next app.
+
+## Conventions & gotchas
 
 - Most pages are client components (`"use client"`) driven by `authClient` hooks.
-- Brand colors are hardcoded hex classes throughout (green `#3F773C`, accent `#F5A51C`, background `#FAFAF6`, border `#E5E9DF`) rather than theme tokens, and dark mode coverage is incomplete. Match the existing style unless asked to migrate.
-- `/create-event` and `/manage-events` are placeholders; `Navbar` links to `/upcoming-events`, which has no route yet.
+- Brand colors are hardcoded hex classes (green `#3F773C`, accent `#F5A51C`, background `#FAFAF6`, border `#E5E9DF`) rather than theme tokens; dark mode coverage incomplete. Match existing style.
+- Images from ImgBB allowed via Next image remote patterns.

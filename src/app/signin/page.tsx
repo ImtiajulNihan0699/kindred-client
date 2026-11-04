@@ -18,10 +18,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SignInPage() {
-  const handleEmailSignIn = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const router = useRouter();
+  const handleEmailSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const user = Object.fromEntries(formData.entries()) as {
@@ -33,11 +35,13 @@ export default function SignInPage() {
       ...user,
     });
     if (data) {
-      redirect("/");
+      toast.success("Signed in successfully");
+      router.push("/");
+      return;
     }
     if (error) {
       console.error("Error signing in user:", error);
-      // Show an error message to the user
+      toast.error(error.message || "Failed to sign in. Please try again.");
     }
   };
  const handleGoogleSignIn = async () => {

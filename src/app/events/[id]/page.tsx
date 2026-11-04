@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Event } from "@/components/events/EventCard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import {
   CalendarDays,
@@ -19,6 +20,7 @@ import {
   ArrowLeft,
   Sparkles,
 } from "lucide-react";
+
 import EditButton from "@/components/updatedelete/EditButton";
 import DeleteButton from "@/components/updatedelete/DeleteButton";
 import JoinEventButton from "@/components/events/JoinEventButton";
@@ -37,35 +39,122 @@ const EventDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchEvent = async () => {
-      try {
-        setLoading(true);
-        setError("");
+  const fetchEvent = useCallback(async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/events/${id}`, {
+        cache: "no-store",
+      });
 
-        const res = await fetch(`http://localhost:8000/events/${id}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch event");
+      }
+
+      const data: Event = await res.json();
+      setEvent(data);
+      setError("");
+    } catch (error) {
+      console.error(error);
+      setError("Unable to load event details.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadEvent = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/events/${id}`, {
+          cache: "no-store",
+        });
 
         if (!res.ok) {
           throw new Error("Failed to fetch event");
         }
 
         const data: Event = await res.json();
-        setEvent(data);
+
+        if (!ignore) {
+          setEvent(data);
+          setError("");
+        }
       } catch (error) {
         console.error(error);
-        setError("Unable to load event details.");
+
+        if (!ignore) {
+          setError("Unable to load event details.");
+        }
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchEvent();
+    loadEvent();
+
+    return () => {
+      ignore = true;
+    };
   }, [id]);
+
+  const handleRetry = async () => {
+    setLoading(true);
+    setError("");
+    await fetchEvent();
+  };
 
   if (loading || isPending) {
     return (
-      <main className="mx-auto max-w-6xl px-6 py-12">
-        <p className="text-muted-foreground">Loading event details...</p>
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <Skeleton className="mb-6 h-5 w-32" />
+
+        <Card className="overflow-hidden border-border bg-card">
+          <Skeleton className="h-72 w-full rounded-none sm:h-[460px]" />
+
+          <CardContent className="space-y-10 p-6 sm:p-10">
+            <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-start">
+              <div className="space-y-3">
+                <Skeleton className="h-7 w-24 rounded-full" />
+                <Skeleton className="h-10 w-2/3 sm:h-12" />
+                <Skeleton className="h-5 w-4/5" />
+              </div>
+
+              <div className="flex gap-3">
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-24" />
+              </div>
+            </div>
+
+            <div className="grid gap-5 rounded-xl border border-border bg-muted/30 p-6 sm:grid-cols-2">
+              <div className="flex items-start gap-4">
+                <Skeleton className="h-12 w-12 rounded-lg" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-5 w-40" />
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <Skeleton className="h-12 w-12 rounded-lg" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-5 w-32" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+
+            <Skeleton className="h-10 w-40" />
+          </CardContent>
+        </Card>
       </main>
     );
   }
@@ -79,9 +168,13 @@ const EventDetailsPage = () => {
           {error || "This event may have been removed."}
         </p>
 
-        <Button className="mt-5" onClick={() => router.back()}>
-          Go Back
-        </Button>
+        <div className="mt-5 flex items-center justify-center gap-3">
+          <Button onClick={handleRetry}>Retry</Button>
+
+          <Button variant="outline" onClick={() => router.back()}>
+            Go Back
+          </Button>
+        </div>
       </main>
     );
   }
@@ -99,7 +192,6 @@ const EventDetailsPage = () => {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
-      {/* Back Navigation */}
       <Link
         href="/events/explore-events"
         className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
@@ -109,7 +201,6 @@ const EventDetailsPage = () => {
       </Link>
 
       <Card className="overflow-hidden border-border bg-card">
-        {/* Event Image */}
         <div className="relative h-72 w-full sm:h-[460px]">
           <Image
             src={event.imageUrl}
@@ -121,7 +212,6 @@ const EventDetailsPage = () => {
         </div>
 
         <CardContent className="space-y-10 p-6 sm:p-10">
-          {/* Event Heading */}
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-start">
             <div className="space-y-3">
               <span className="inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
@@ -138,7 +228,6 @@ const EventDetailsPage = () => {
               </p>
             </div>
 
-            {/* Creator-only Actions */}
             {isEventCreator && (
               <div className="flex shrink-0 gap-3">
                 <EditButton
@@ -154,7 +243,6 @@ const EventDetailsPage = () => {
             )}
           </div>
 
-          {/* Event Information */}
           <div className="grid gap-5 rounded-xl border border-border bg-muted/30 p-6 sm:grid-cols-2">
             <div className="flex items-start gap-4">
               <div className="rounded-lg bg-primary/10 p-3 text-primary">
@@ -163,7 +251,6 @@ const EventDetailsPage = () => {
 
               <div>
                 <p className="text-sm text-muted-foreground">Event Date</p>
-
                 <p className="mt-1 font-semibold">{formattedDate}</p>
               </div>
             </div>
@@ -175,13 +262,11 @@ const EventDetailsPage = () => {
 
               <div>
                 <p className="text-sm text-muted-foreground">Event Location</p>
-
                 <p className="mt-1 font-semibold">{event.location}</p>
               </div>
             </div>
           </div>
 
-          {/* Event Description */}
           <section>
             <h2 className="text-2xl font-bold">About This Event</h2>
 
@@ -190,14 +275,13 @@ const EventDetailsPage = () => {
             </p>
           </section>
 
-          {/* Why Join Section */}
           <section className="space-y-6">
             <div>
               <h2 className="text-2xl font-bold">Why Join This Event?</h2>
 
               <p className="mt-2 text-muted-foreground">
-                Every contribution matters. Your participation can help create a
-                stronger and more connected community.
+                Every contribution matters. Your participation can help create
+                a stronger and more connected community.
               </p>
             </div>
 
@@ -243,7 +327,6 @@ const EventDetailsPage = () => {
             </div>
           </section>
 
-          {/* Join Event Section - Visible to Everyone */}
           {userId ? (
             <JoinEventButton eventId={event._id} userId={userId} />
           ) : (
@@ -254,7 +337,6 @@ const EventDetailsPage = () => {
         </CardContent>
       </Card>
 
-      {/* Community Message */}
       <div className="mt-8 flex flex-col items-center gap-3 text-center">
         <HandHeart size={28} className="text-primary" />
 

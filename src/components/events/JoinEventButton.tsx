@@ -1,8 +1,8 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 type JoinEventButtonProps = {
   eventId: string;
@@ -83,10 +83,11 @@ const JoinEventButton = ({
       }
 
       setIsJoined(true);
+      toast.success("You have successfully joined this event");
     } catch (error) {
       console.error(error);
 
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Something went wrong",

@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import {
   Dialog,
@@ -106,7 +107,7 @@ const EditButton = ({ event, onUpdated }: EditButtonProps) => {
       );
 
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(
           errorData.message || "Failed to update event",
         );
@@ -118,6 +119,7 @@ const EditButton = ({ event, onUpdated }: EditButtonProps) => {
       };
 
       setOpen(false);
+      toast.success("Event updated successfully");
 
       // Update the Event Details page if a callback was provided.
       if (onUpdated) {
@@ -131,7 +133,7 @@ const EditButton = ({ event, onUpdated }: EditButtonProps) => {
     } catch (error) {
       console.error(error);
 
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Something went wrong while updating the event.",

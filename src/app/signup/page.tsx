@@ -4,6 +4,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -63,12 +64,16 @@ export default function SignUpPage() {
     setErrorMessage("");
 
     if (!isPasswordValid) {
-      setErrorMessage("Please meet all password requirements.");
+      const msg = "Please meet all password requirements.";
+      setErrorMessage(msg);
+      toast.error(msg);
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage("Passwords do not match.");
+      const msg = "Passwords do not match.";
+      setErrorMessage(msg);
+      toast.error(msg);
       return;
     }
 
@@ -87,15 +92,20 @@ export default function SignUpPage() {
       const { data, error } = await authClient.signUp.email(user);
 
       if (error) {
-        setErrorMessage(error.message || "Unable to create your account.");
+        const msg = error.message || "Unable to create your account.";
+        setErrorMessage(msg);
+        toast.error(msg);
         return;
       }
 
       if (data) {
+        toast.success("Account created successfully");
         router.push("/");
       }
     } catch {
-      setErrorMessage("Something went wrong. Please try again.");
+      const msg = "Something went wrong. Please try again.";
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }

@@ -2,6 +2,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,20 +22,23 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
 export default function ProfilePage() {
+  const router = useRouter();
+
   const { data: session, isPending } = authClient.useSession();
   const currentUser = session?.user;
 
   const [name, setName] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const displayName = name ?? currentUser?.name ?? "";
+  const displayImage = image ?? currentUser?.image ?? "";
 
   const handleUpdateUser = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
 
-    setMessage("");
     setIsUpdating(true);
 
     try {
@@ -42,13 +48,15 @@ export default function ProfilePage() {
       });
 
       if (error) {
-        setMessage(error.message || "Failed to update profile.");
+        toast.error(error.message || "Failed to update profile.");
         return;
       }
 
-      setMessage("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
+
+      router.push("/");
     } catch {
-      setMessage("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsUpdating(false);
     }
@@ -69,9 +77,6 @@ export default function ProfilePage() {
       </p>
     );
   }
-
-  const displayName = name ?? currentUser.name ?? "";
-  const displayImage = image ?? currentUser.image ?? "";
 
   return (
     <div className="mx-auto my-10 flex max-w-2xl flex-col gap-6 px-6 sm:px-10">
@@ -129,12 +134,6 @@ export default function ProfilePage() {
                   disabled
                 />
               </Field>
-
-              {message && (
-                <p className="text-center text-sm text-primary">
-                  {message}
-                </p>
-              )}
 
               <Field>
                 <Button
