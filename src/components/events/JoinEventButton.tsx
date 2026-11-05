@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -23,8 +24,14 @@ const JoinEventButton = ({
 
     const fetchJoinedStatus = async () => {
       try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        if (!apiUrl) {
+          throw new Error("API URL is not configured");
+        }
+
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/joined-events/user/${userId}/check/${eventId}`,
+          `${apiUrl}/joined-events/user/${userId}/check/${eventId}`,
           { cache: "no-store" },
         );
 
@@ -39,7 +46,7 @@ const JoinEventButton = ({
         }
       } catch (error) {
         if (!ignore) {
-          console.error(error);
+          console.error("Joined status error:", error);
         }
       } finally {
         if (!ignore) {
@@ -60,32 +67,33 @@ const JoinEventButton = ({
     try {
       setIsJoining(true);
 
-      const res = await fetch(
-        "http://localhost:8000/joined-events",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            eventId,
-          }),
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        throw new Error("API URL is not configured");
+      }
+
+      const res = await fetch(`${apiUrl}/joined-events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          userId,
+          eventId,
+        }),
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          data.message || "Failed to join event",
-        );
+        throw new Error(data.message || "Failed to join event");
       }
 
       setIsJoined(true);
       toast.success("You have successfully joined this event");
     } catch (error) {
-      console.error(error);
+      console.error("Join event error:", error);
 
       toast.error(
         error instanceof Error
