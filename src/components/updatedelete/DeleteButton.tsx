@@ -31,29 +31,37 @@ const DeleteButton = ({
   onDeleted,
 }: DeleteButtonProps) => {
   const router = useRouter();
-
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    if (!apiUrl) {
+      toast.error("API URL is not configured.");
+      return;
+    }
+
     try {
       setIsDeleting(true);
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`,
+        `${apiUrl}/events/${eventId}`,
         {
           method: "DELETE",
-        },
+        }
       );
 
-      const data = await res.json();
+      const data: { message?: string } = await res
+        .json()
+        .catch(() => ({}));
 
       if (!res.ok) {
         throw new Error(
-          data.message || "Failed to delete event",
+          data.message || "Failed to delete event."
         );
       }
 
-      toast.success("Event deleted successfully");
+      toast.success("Event deleted successfully.");
 
       if (onDeleted) {
         onDeleted(eventId);
@@ -62,12 +70,12 @@ const DeleteButton = ({
         router.refresh();
       }
     } catch (error) {
-      console.error(error);
+      console.error("Delete event error:", error);
 
       toast.error(
         error instanceof Error
           ? error.message
-          : "Something went wrong while deleting the event.",
+          : "Something went wrong while deleting the event."
       );
     } finally {
       setIsDeleting(false);
@@ -81,6 +89,7 @@ const DeleteButton = ({
           <Button
             variant="destructive"
             className="flex-1"
+            disabled={isDeleting}
           >
             Delete
           </Button>

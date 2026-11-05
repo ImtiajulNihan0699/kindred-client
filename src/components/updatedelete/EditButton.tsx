@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Pencil } from "lucide-react";
 
 import {
   Dialog,
@@ -25,7 +26,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "../ui/button";
 
-import { Pencil } from "lucide-react";
 import type { Event } from "@/components/events/EventCard";
 
 type EditButtonProps = {
@@ -59,7 +59,7 @@ const EditButton = ({ event, onUpdated }: EditButtonProps) => {
   });
 
   const [formData, setFormData] = useState<EventFormData>(
-    getInitialValues,
+    getInitialValues
   );
 
   const hasChanges = Object.keys(formData).some((key) => {
@@ -69,7 +69,7 @@ const EditButton = ({ event, onUpdated }: EditButtonProps) => {
 
   const handleChange = (
     field: keyof EventFormData,
-    value: string,
+    value: string
   ) => {
     setFormData((previous) => ({
       ...previous,
@@ -86,30 +86,40 @@ const EditButton = ({ event, onUpdated }: EditButtonProps) => {
   };
 
   const handleUpdateEvent = async (
-    e: React.FormEvent<HTMLFormElement>,
+    e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
 
-    if (!hasChanges) return;
+    if (!hasChanges || isUpdating) return;
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    if (!apiUrl) {
+      toast.error("API URL is not configured.");
+      return;
+    }
 
     try {
       setIsUpdating(true);
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/events/${event._id}`,
+        `${apiUrl}/events/${event._id}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formData),
-        },
+        }
       );
 
+      const errorData: { message?: string } = await res
+        .json()
+        .catch(() => ({}));
+
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
         throw new Error(
-          errorData.message || "Failed to update event",
+          errorData.message || "Failed to update event."
         );
       }
 
@@ -118,25 +128,24 @@ const EditButton = ({ event, onUpdated }: EditButtonProps) => {
         ...formData,
       };
 
-      setOpen(false);
-      toast.success("Event updated successfully");
+      toast.success("Event updated successfully.");
 
-      // Update the Event Details page if a callback was provided.
+      setOpen(false);
+
       if (onUpdated) {
         onUpdated(updatedEvent);
       } else {
-        // When editing from an EventCard, go to Event Details.
         router.push(`/events/${event._id}`);
       }
 
       router.refresh();
     } catch (error) {
-      console.error(error);
+      console.error("Update event error:", error);
 
       toast.error(
         error instanceof Error
           ? error.message
-          : "Something went wrong while updating the event.",
+          : "Something went wrong while updating the event."
       );
     } finally {
       setIsUpdating(false);
@@ -154,7 +163,7 @@ const EditButton = ({ event, onUpdated }: EditButtonProps) => {
         }
       />
 
-      <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-h-[85vh] w-[95vw] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit Event</DialogTitle>
           <DialogDescription>

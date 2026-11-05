@@ -1,7 +1,10 @@
 
-import { Card, CardContent } from "@/components/ui/card";
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 import EditButton from "../updatedelete/EditButton";
@@ -31,8 +34,10 @@ const EventCard = ({
   showDelete = false,
   onDelete,
 }: EventCardProps) => {
+  const router = useRouter();
+
   const formattedDate = new Date(
-    `${event.eventDate}T00:00:00`,
+    `${event.eventDate}T00:00:00`
   ).toLocaleDateString("en-BD", {
     day: "numeric",
     month: "short",
@@ -68,9 +73,12 @@ const EventCard = ({
         </p>
 
         <div className="flex gap-2">
-          <Link href={`/events/${event._id}`} className="flex-1">
-            <Button className="w-full">View Details</Button>
-          </Link>
+          <Button
+            className="flex-1"
+            onClick={() => router.push(`/events/${event._id}`)}
+          >
+            View Details
+          </Button>
 
           {showEdit && <EditButton event={event} />}
 
