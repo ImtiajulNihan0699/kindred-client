@@ -24,7 +24,7 @@ const JoinEventButton = ({
     const fetchJoinedStatus = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8000/joined-events/user/${userId}/check/${eventId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/joined-events/user/${userId}/check/${eventId}`,
           { cache: "no-store" },
         );
 

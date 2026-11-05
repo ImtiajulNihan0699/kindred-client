@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -24,10 +25,20 @@ const FeaturedEvents = () => {
         setLoading(true);
         setError("");
 
-        const res = await fetch("http://localhost:8000/events");
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        if (!apiUrl) {
+          throw new Error("NEXT_PUBLIC_API_URL is not configured");
+        }
+
+        const res = await fetch(`${apiUrl}/events`, {
+          cache: "no-store",
+        });
 
         if (!res.ok) {
-          throw new Error("Failed to fetch events");
+          throw new Error(
+            `Failed to fetch events. Server responded with status ${res.status}`
+          );
         }
 
         const data: Event[] = await res.json();
@@ -46,8 +57,13 @@ const FeaturedEvents = () => {
 
         setEvents(upcomingEvents);
       } catch (err) {
-        console.error(err);
-        setError("Unable to load featured events.");
+        console.error("Featured events error:", err);
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load featured events."
+        );
       } finally {
         setLoading(false);
       }
@@ -68,6 +84,7 @@ const FeaturedEvents = () => {
             community.
           </p>
         </div>
+
         <Link href="/events/upcoming-events">
           <Button variant="outline">View all events</Button>
         </Link>
@@ -132,6 +149,7 @@ const FeaturedEvents = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
+
           <CarouselPrevious className="hidden sm:flex -left-4" />
           <CarouselNext className="hidden sm:flex -right-4" />
         </Carousel>
@@ -141,3 +159,4 @@ const FeaturedEvents = () => {
 };
 
 export default FeaturedEvents;
+

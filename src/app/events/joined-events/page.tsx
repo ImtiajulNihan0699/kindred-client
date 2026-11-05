@@ -31,7 +31,7 @@ const JoinedEventsPage = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:8000/joined-events/user/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/joined-events/user/${userId}`,
         { cache: "no-store" },
       );
 

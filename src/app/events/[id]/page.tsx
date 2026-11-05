@@ -8,7 +8,6 @@ import { auth } from "@/lib/auth";
 import type { Event } from "@/components/events/EventCard";
 
 import { Card, CardContent } from "@/components/ui/card";
-
 import EventDetailsActions from "@/components/events/EventDetailsActions";
 
 import {
@@ -37,11 +36,10 @@ export default async function EventDetailsPage({
     headers: requestHeaders,
   });
 
-  const user = session?.user;
-  const userId = user?.id;
+  const userId = session?.user?.id;
 
   // Fetch event details from the backend.
-  const res = await fetch(`http://localhost:8000/events/${id}`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${id}`, {
     cache: "no-store",
   });
 

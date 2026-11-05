@@ -96,7 +96,7 @@ const EditButton = ({ event, onUpdated }: EditButtonProps) => {
       setIsUpdating(true);
 
       const res = await fetch(
-        `http://localhost:8000/events/${event._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/events/${event._id}`,
         {
           method: "PATCH",
           headers: {

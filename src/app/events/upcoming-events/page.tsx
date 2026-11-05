@@ -28,7 +28,7 @@ const UpcomingEventsPage = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch("http://localhost:8000/events");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`);
 
         if (!res.ok) {
           throw new Error("Failed to fetch events");

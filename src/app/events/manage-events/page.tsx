@@ -51,7 +51,7 @@ const ManageEventsPage = () => {
     const loadUserEvents = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8000/events/user/${userId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/events/user/${userId}`,
           { cache: "no-store" },
         );
 

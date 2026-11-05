@@ -39,7 +39,7 @@ const DeleteButton = ({
       setIsDeleting(true);
 
       const res = await fetch(
-        `http://localhost:8000/events/${eventId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`,
         {
           method: "DELETE",
         },
